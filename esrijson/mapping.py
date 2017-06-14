@@ -10,7 +10,12 @@ from esrijson import EsriJSON
 GEO_INTERFACE_MARKER = '__geo_interface__'
 
 
-# __geo_interface__ is implemented in shapely (GDAL)
+"""
+:param obj: An object representing a feature.
+:type obj: dict | EsriJSON instance | shapely geometry
+"""
+
+
 def to_mapping(obj):
 
     mapping = getattr(obj, GEO_INTERFACE_MARKER, None)
@@ -19,6 +24,6 @@ def to_mapping(obj):
         return mapping
 
     if isinstance(obj, EsriJSON):
-        return dict(obj)
+        return obj
 
     return json.loads(json.dumps(obj))

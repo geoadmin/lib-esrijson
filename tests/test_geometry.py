@@ -16,6 +16,9 @@ class TestGeometry(unittest.TestCase):
         esri_spec = Geometry(geometry=point, wkid=2056)
         self.assertEqual(
             esri_spec['geometry']['spatialReference']['wkid'], 2056)
+        esri_spec_copy = Geometry(geometry=esri_spec)
+        self.assertEqual(
+            esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
 
     def test_multipoint(self):
         multipoint = geometry.MultiPoint([[0, 1], [1, 2]])
@@ -31,6 +34,9 @@ class TestGeometry(unittest.TestCase):
         esri_spec = Geometry(geometry=multipoint, wkid=2056)
         self.assertEqual(
             esri_spec['geometry']['spatialReference']['wkid'], 2056)
+        esri_spec_copy = Geometry(geometry=esri_spec)
+        self.assertEqual(
+            esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
 
     def test_linestring(self):
         linestring = geometry.LineString([(0, 0), (1, 1)])
@@ -48,6 +54,9 @@ class TestGeometry(unittest.TestCase):
         esri_spec = Geometry(geometry=linestring, wkid=2056)
         self.assertEqual(
             esri_spec['geometry']['spatialReference']['wkid'], 2056)
+        esri_spec_copy = Geometry(geometry=esri_spec)
+        self.assertEqual(
+            esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
 
     def test_multilinestring(self):
         multilinestring = geometry.MultiLineString(
@@ -70,6 +79,9 @@ class TestGeometry(unittest.TestCase):
         esri_spec = Geometry(geometry=multilinestring, wkid=2056)
         self.assertEqual(
             esri_spec['geometry']['spatialReference']['wkid'], 2056)
+        esri_spec_copy = Geometry(geometry=esri_spec)
+        self.assertEqual(
+            esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
 
     def test_polygon(self):
         # Coordinates are oriented clock-wise
@@ -92,6 +104,9 @@ class TestGeometry(unittest.TestCase):
         esri_spec = Geometry(geometry=polygon, wkid=2056)
         self.assertEqual(
             esri_spec['geometry']['spatialReference']['wkid'], 2056)
+        esri_spec_copy = Geometry(geometry=esri_spec)
+        self.assertEqual(
+            esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
 
     def test_multipolygon(self):
         polygons = [geometry.Polygon([(0, 0), (1, 1), (2, 1), (0, 0)]),

@@ -216,3 +216,9 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(
             esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
         self.assertToShape(multipolygon, esri_spec, esri_spec_copy)
+
+    def test_bbox(self):
+        bbox = geometry.box(1, 1, 2, 2)
+        esri_spec = {'xmin': 1, 'ymin': 1, 'xmax': 2, 'ymax': 2}
+        esri_spec_alt = [1, 1, 2, 2]
+        self.assertToShape(bbox, esri_spec, esri_spec_alt)

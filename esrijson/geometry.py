@@ -1,6 +1,6 @@
 from esrijson.base import EsriJSON
 from esrijson.mapping import to_mapping
-from shapely.geometry import Point, MultiPoint, LineString
+from shapely.geometry import Point, MultiPoint, LineString, box
 from shapely.geometry import MultiLineString, Polygon, MultiPolygon
 
 
@@ -43,10 +43,24 @@ def create_multipolygon(geometry):
     return MultiPolygon(rings)
 
 
+def _is_bbox(bbox):
+    if type(bbox) == list and len(bbox) == 4:
+        if bbox[0] > bbox[2] or bbox[1] > bbox[3]:
+            raise ValueError(
+                'Invalid bbox, must be [xmin, ymin, xmax, ymax]')
+        return True
+
+
 def to_shape(obj):
     geometry = obj['geometry'] if 'geometry' in obj else obj
     if 'x' in geometry:
         return create_point(geometry)
+    elif 'xmin' in geometry or _is_bbox(geometry):
+        if type(geometry) == list:
+            return box(*geometry)
+        else:
+            return box(geometry['xmin'], geometry['ymin'],
+                       geometry['xmax'], geometry['ymax'])
     elif 'points' in geometry:
         return create_multipoint(geometry)
     elif 'paths' in geometry and len(geometry['paths']) == 1:

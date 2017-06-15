@@ -1,9 +1,19 @@
 import unittest
-from esrijson import Geometry
+from esrijson import Geometry, to_shape
 from shapely import geometry
 
 
 class TestGeometry(unittest.TestCase):
+
+    def assertToShape(self, first_shp, esri_spec, esri_spec_copy):
+        shp = to_shape(esri_spec)
+        shp_copy = to_shape(esri_spec_copy)
+        self.assertEqual(
+            getattr(first_shp, '__geo_interface__'),
+            getattr(shp, '__geo_interface__'))
+        self.assertEqual(
+            getattr(first_shp, '__geo_interface__'),
+            getattr(shp_copy, '__geo_interface__'))
 
     def test_point(self):
         point = geometry.Point([0, 1])
@@ -20,10 +30,13 @@ class TestGeometry(unittest.TestCase):
 
         esri_spec = Geometry(geometry=point, wkid=2056)
         self.assertEqual(
-            esri_spec['geometry']['spatialReference']['wkid'], 2056)
+            esri_spec['geometry']['spatialReference']['wkid'],
+            2056)
         esri_spec_copy = Geometry(geometry=esri_spec)
         self.assertEqual(
-            esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
+            esri_spec_copy['geometry']['spatialReference']['wkid'],
+            2056)
+        self.assertToShape(point, esri_spec, esri_spec_copy)
 
     def test_multipoint(self):
         multipoint = geometry.MultiPoint([[0, 1], [1, 2]])
@@ -45,10 +58,13 @@ class TestGeometry(unittest.TestCase):
 
         esri_spec = Geometry(geometry=multipoint, wkid=2056)
         self.assertEqual(
-            esri_spec['geometry']['spatialReference']['wkid'], 2056)
+            esri_spec['geometry']['spatialReference']['wkid'],
+            2056)
         esri_spec_copy = Geometry(geometry=esri_spec)
         self.assertEqual(
-            esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
+            esri_spec_copy['geometry']['spatialReference']['wkid'],
+            2056)
+        self.assertToShape(multipoint, esri_spec, esri_spec_copy)
 
     def test_linestring(self):
         linestring = geometry.LineString([(0, 0), (1, 1)])
@@ -71,10 +87,13 @@ class TestGeometry(unittest.TestCase):
 
         esri_spec = Geometry(geometry=linestring, wkid=2056)
         self.assertEqual(
-            esri_spec['geometry']['spatialReference']['wkid'], 2056)
+            esri_spec['geometry']['spatialReference']['wkid'],
+            2056)
         esri_spec_copy = Geometry(geometry=esri_spec)
         self.assertEqual(
-            esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
+            esri_spec_copy['geometry']['spatialReference']['wkid'],
+            2056)
+        self.assertToShape(linestring, esri_spec, esri_spec_copy)
 
     def test_multilinestring(self):
         multilinestring = geometry.MultiLineString(
@@ -105,10 +124,13 @@ class TestGeometry(unittest.TestCase):
 
         esri_spec = Geometry(geometry=multilinestring, wkid=2056)
         self.assertEqual(
-            esri_spec['geometry']['spatialReference']['wkid'], 2056)
+            esri_spec['geometry']['spatialReference']['wkid'],
+            2056)
         esri_spec_copy = Geometry(geometry=esri_spec)
         self.assertEqual(
-            esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
+            esri_spec_copy['geometry']['spatialReference']['wkid'],
+            2056)
+        self.assertToShape(multilinestring, esri_spec, esri_spec_copy)
 
     def test_polygon(self):
         # Coordinates are oriented clock-wise
@@ -143,6 +165,7 @@ class TestGeometry(unittest.TestCase):
         esri_spec_copy = Geometry(geometry=esri_spec)
         self.assertEqual(
             esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
+        self.assertToShape(polygon, esri_spec, esri_spec_copy)
 
     def test_multipolygon(self):
         polygons = [geometry.Polygon([(0, 0), (1, 1), (2, 1), (0, 0)]),
@@ -192,3 +215,4 @@ class TestGeometry(unittest.TestCase):
         esri_spec_copy = Geometry(geometry=esri_spec)
         self.assertEqual(
             esri_spec_copy['geometry']['spatialReference']['wkid'], 2056)
+        self.assertToShape(multipolygon, esri_spec, esri_spec_copy)

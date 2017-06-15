@@ -1,22 +1,4 @@
-from shapely.geometry import Polygon
-from shapely.geometry.polygon import orient
-
-
-# For EsriJSON, exterior rings are oriented clockwise,
-# while holes are oriented counter-clockwise.
-# For GeoJSON, Polygons with multiple rings, the first must be the exterior
-# ring and any others must be interior rings or holes.
-def _orient_polygon_coords(coords):
-    oriented_esri_coords = []
-    for i in range(0, len(coords)):
-        poly = Polygon(coords[i])
-        # Orient the first poly clock-wise (exterior ring)
-        if i == 0:
-            c = list(orient(poly, sign=-1.0).exterior.coords)
-        else:
-            c = list(orient(poly).exterior.coords)
-        oriented_esri_coords.append(c)
-    return oriented_esri_coords
+from esrijson.utils import orient_polygon_coords
 
 
 class EsriJSON(dict):
@@ -25,7 +7,7 @@ class EsriJSON(dict):
         self.update(extra)
 
     @classmethod
-    def to_instance(self, obj, wkid):
+    def to_instance(cls, obj, wkid):
         # obj can be an OGC geometry or an instance of EsriJSON
         if isinstance(obj, EsriJSON):
             return dict(obj)['geometry']
@@ -54,14 +36,14 @@ class EsriJSON(dict):
                     if len(coords[0][0]) == 3:
                         esri_geom['hasZ'] = True
                 elif type_ == 'Polygon':
-                    esri_geom['rings'] = _orient_polygon_coords(coords)
+                    esri_geom['rings'] = orient_polygon_coords(coords)
                     if len(coords[0][0]) == 3:
                         esri_geom['hasZ'] = True
                 elif type_ == 'MultiPolygon':
                     esri_geom['rings'] = []
                     for poly in coords:
                         esri_geom['rings'].append(
-                            _orient_polygon_coords(poly)[0])
+                            orient_polygon_coords(poly)[0])
                     if len(coords[0][0][0]) == 3:
                         esri_geom['hasZ'] = True
                 else:

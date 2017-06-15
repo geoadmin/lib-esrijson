@@ -1,4 +1,5 @@
 from esrijson.base import EsriJSON
+from esrijson.mapping import to_mapping
 
 
 class Feature(EsriJSON):
@@ -10,7 +11,7 @@ class Feature(EsriJSON):
         Initialises a Feature object with the given parameters.
 
         :param id: Feature identifier, such as a sequential number.
-        :type id: str, int
+        :type id: str, int (not comp. in esri spec)
         :param geometry: Geometry corresponding to the feature.
         :param wkid: well-know ID of the spatial reference.
         :param attributes: Dict containing the attributes of the feature.
@@ -20,7 +21,7 @@ class Feature(EsriJSON):
         if id is not None:
             self["id"] = id
         if geometry:
-            self['geometry'] = self.to_instance(geometry, wkid)
+            self['geometry'] = self.to_instance(to_mapping(geometry), wkid)
         else:
             self['geometry'] = None
         self['attributes'] = attributes or {}

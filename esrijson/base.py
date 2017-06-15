@@ -51,16 +51,19 @@ class EsriJSON(dict):
                         esri_geom['hasZ'] = True
                 elif type_ == 'MultiLineString':
                     esri_geom['paths'] = coords
-                    if len(coords[0]) == 3:
+                    if len(coords[0][0]) == 3:
                         esri_geom['hasZ'] = True
                 elif type_ == 'Polygon':
                     esri_geom['rings'] = _orient_polygon_coords(coords)
-                    if len(coords[0]) == 3:
+                    if len(coords[0][0]) == 3:
                         esri_geom['hasZ'] = True
                 elif type_ == 'MultiPolygon':
                     esri_geom['rings'] = []
                     for poly in coords:
-                        esri_geom['rings'].append(_orient_polygon_coords(poly))
+                        esri_geom['rings'].append(
+                            _orient_polygon_coords(poly)[0])
+                    if len(coords[0][0][0]) == 3:
+                        esri_geom['hasZ'] = True
                 else:
                     raise TypeError(
                         'OGC geometry type %s is not supported' % type_)

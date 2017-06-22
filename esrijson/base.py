@@ -1,54 +1,86 @@
+import esrijson
 from esrijson.utils import orient_polygon_coords
+
+
+ESRI_GEOMETRY_KEYS = ['x', 'xmin', 'points', 'paths', 'rings']
+
+
+def _is_geo_interface(obj):
+    return 'type' in obj and 'coordinates' in obj
 
 
 class EsriJSON(dict):
 
     def __init__(self, **extra):
+        ## IMPORTANT USE GEOMETRYTYPE
+        print 'init base'
+        self["type"] = getattr(self, "type", type(self).__name__)
         self.update(extra)
 
+    def __getattr__(self, name):
+        """
+        Permit dictionary items to be retrieved like object attributes
+
+        :param name: attribute name
+        :type name: str, int
+        :return: dictionary value
+        """
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(name)
+
+    def __setattr__(self, name, value):
+        """
+        Permit dictionary items to be set like object attributes.
+
+        :param name: key of item to be set
+        :type name: str
+        :param value: value to set item to
+        """
+
+        self[name] = value
+
+    def __delattr__(self, name):
+        """
+        Permit dictionary items to be deleted like object attributes
+
+        :param name: key of item to be deleted
+        :type name: str
+        """
+
+        del self[name]
+
     @classmethod
-    def to_instance(cls, obj, wkid):
+    def to_instance(cls, obj, wkid=None):
+        print 'to instance'
+        print type(obj)
+        print '--------------------'
         # obj can be an OGC geometry or an instance of EsriJSON
         if isinstance(obj, EsriJSON):
-            return dict(obj)['geometry']
-        else:
-            esri_geom = {}
-
-            # We use __geo_interface__ from GDAL (shapely)
-            type_ = obj.pop('type')
-            coords = obj.pop('coordinates')
-            if type_:
-                if type_ == 'Point':
-                    esri_geom['x'] = coords[0]
-                    esri_geom['y'] = coords[1]
-                    if len(coords) == 3:
-                        esri_geom['z'] = coords[2]
-                elif type_ == 'MultiPoint':
-                    esri_geom['points'] = coords
-                    if len(coords[0]) == 3:
-                        esri_geom['hasZ'] = True
-                elif type_ == 'LineString':
-                    esri_geom['paths'] = [coords]
-                    if len(coords[0]) == 3:
-                        esri_geom['hasZ'] = True
-                elif type_ == 'MultiLineString':
-                    esri_geom['paths'] = coords
-                    if len(coords[0][0]) == 3:
-                        esri_geom['hasZ'] = True
-                elif type_ == 'Polygon':
-                    esri_geom['rings'] = orient_polygon_coords(coords)
-                    if len(coords[0][0]) == 3:
-                        esri_geom['hasZ'] = True
-                elif type_ == 'MultiPolygon':
-                    esri_geom['rings'] = []
-                    for poly in coords:
-                        esri_geom['rings'].append(
-                            orient_polygon_coords(poly)[0])
-                    if len(coords[0][0][0]) == 3:
-                        esri_geom['hasZ'] = True
-                else:
-                    raise TypeError(
-                        'OGC geometry type %s is not supported' % type_)
-            if wkid:
-                esri_geom['spatialReference'] = {'wkid': int(wkid)}
-            return esri_geom
+            print 'instance of esrijson'
+            print obj
+            instance = obj
+        elif isinstance(obj, dict):
+            #import sys
+            #sys.exit(0)
+            d = {}
+            for k in obj:
+                d[k] = obj[k]
+            #else:
+            #    print d
+            #    type_ = getattr(cls, 'type')
+            #    factory = getattr(esrijson.factory, type_)
+            #    return factory(**d)
+            if any(k in ESRI_GEOMETRY_KEYS for k in obj):
+                factory = getattr(esrijson.factory, 'Geometry')
+                instance = factory(geometry=d)
+            elif 'type' in d and d['type'] == 'Feature':
+                factory = getattr(esrijson.factory, 'Feature')
+                instance = factory(**d)
+            else:
+                instance = obj
+        print 'some instance'
+        print type(instance)
+        print instance
+        return instance

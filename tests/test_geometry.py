@@ -19,6 +19,7 @@ class TestGeometry(unittest.TestCase):
         point = geometry.Point([0, 1])
 
         esri_spec = Geometry(geometry=point)
+        print esri_spec
         self.assertEqual(esri_spec['geometry']['x'], 0)
         self.assertEqual(esri_spec['geometry']['y'], 1)
         self.assertNotIn('spatialReference', esri_spec['geometry'])

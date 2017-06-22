@@ -4,6 +4,9 @@ from shapely.geometry import Point, MultiPoint, LineString, box
 from shapely.geometry import MultiLineString, Polygon, MultiPolygon
 
 
+GEO_INTERFACE_MARKER = '__geo_interface__'
+
+
 def create_point(geometry):
     if 'z' in geometry:
         return Point(geometry['x'], geometry['y'], geometry['z'])
@@ -76,8 +79,72 @@ def to_shape(obj):
             'Esri geometry spec is incorrect or not supported')
 
 
+def from_shape(obj, wkid=None):
+    obj = getattr(obj, GEO_INTERFACE_MARKER)
+    esri_geom = {}
+    # We use __geo_interface__ from GDAL (shapely)
+    type_ = obj.pop('type')
+    coords = obj.pop('coordinates')
+    if type_:
+        if type_ == 'Point':
+            esri_geom['x'] = coords[0]
+            esri_geom['y'] = coords[1]
+            if len(coords) == 3:
+                esri_geom['z'] = coords[2]
+        elif type_ == 'MultiPoint':
+            esri_geom['points'] = coords
+            if len(coords[0]) == 3:
+                esri_geom['hasZ'] = True
+        elif type_ == 'LineString':
+            esri_geom['paths'] = [coords]
+            if len(coords[0]) == 3:
+                esri_geom['hasZ'] = True
+        elif type_ == 'MultiLineString':
+            esri_geom['paths'] = coords
+            if len(coords[0][0]) == 3:
+                esri_geom['hasZ'] = True
+        elif type_ == 'Polygon':
+            esri_geom['rings'] = orient_polygon_coords(coords)
+            if len(coords[0][0]) == 3:
+                esri_geom['hasZ'] = True
+        elif type_ == 'MultiPolygon':
+            esri_geom['rings'] = []
+            for poly in coords:
+                esri_geom['rings'].append(
+                    orient_polygon_coords(poly)[0])
+            if len(coords[0][0][0]) == 3:
+                esri_geom['hasZ'] = True
+        else:
+            raise TypeError(
+                'OGC geometry type %s is not supported' % type_)
+    if wkid:
+        esri_geom['spatialReference'] = {'wkid': int(wkid)}
+    return esri_geom
+
+
 class Geometry(EsriJSON):
 
     def __init__(self, geometry=None, wkid=None, **extra):
+        print 'init geometry'
+        print geometry
         super(Geometry, self).__init__(**extra)
-        self['geometry'] = self.to_instance(to_mapping(geometry), wkid)
+        ESRI_GEOMETRY_KEYS = ['x', 'xmin', 'points', 'paths', 'rings']
+        #self['geometry'] = geometry or {}
+        if 'x' in geometry and 'y' in geometry:
+            self['x'] = geometry['x']
+            self['y'] = geometry['y']
+        elif 'points' in geometry:
+            self['points'] = geometry['points']
+        elif 'paths' in geometry:
+            self['paths'] = geometry['paths']
+        elif 'rings' in geometry:
+            self['rings'] = geometry['rings']
+
+        if wkid:
+            self['wkid'] = wkid
+        del self['type']
+
+
+
+class GeometryProxy(Geometry):
+    pass

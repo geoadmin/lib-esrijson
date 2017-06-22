@@ -12,9 +12,6 @@ def _is_geo_interface(obj):
 class EsriJSON(dict):
 
     def __init__(self, **extra):
-        ## IMPORTANT USE GEOMETRYTYPE
-        print 'init base'
-        self["type"] = getattr(self, "type", type(self).__name__)
         self.update(extra)
 
     def __getattr__(self, name):
@@ -53,34 +50,18 @@ class EsriJSON(dict):
 
     @classmethod
     def to_instance(cls, obj, wkid=None):
-        print 'to instance'
-        print type(obj)
-        print '--------------------'
-        # obj can be an OGC geometry or an instance of EsriJSON
         if isinstance(obj, EsriJSON):
-            print 'instance of esrijson'
-            print obj
             instance = obj
         elif isinstance(obj, dict):
-            #import sys
-            #sys.exit(0)
             d = {}
             for k in obj:
                 d[k] = obj[k]
-            #else:
-            #    print d
-            #    type_ = getattr(cls, 'type')
-            #    factory = getattr(esrijson.factory, type_)
-            #    return factory(**d)
             if any(k in ESRI_GEOMETRY_KEYS for k in obj):
                 factory = getattr(esrijson.factory, 'Geometry')
                 instance = factory(geometry=d)
-            elif 'type' in d and d['type'] == 'Feature':
+            elif 'attributes' in d and 'geometry' in d:
                 factory = getattr(esrijson.factory, 'Feature')
                 instance = factory(**d)
             else:
                 instance = obj
-        print 'some instance'
-        print type(instance)
-        print instance
         return instance

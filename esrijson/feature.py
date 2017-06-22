@@ -5,6 +5,8 @@ from esrijson.mapping import to_mapping
 
 class Feature(EsriJSON):
 
+    type_ = 'Feature'
+
     def __init__(self, geometry=None, wkid=None, attributes=None, id=None,
                  **extra):
 
@@ -20,6 +22,7 @@ class Feature(EsriJSON):
         """
         print 'init feature'
         super(Feature, self).__init__(**extra)
+        self["type"] = getattr(self, "type", type(self).__name__)
         if id is not None:
             self['id'] = id
         if hasattr(geometry, '__geo_interface__'):

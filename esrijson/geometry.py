@@ -125,14 +125,17 @@ def from_shape(obj, wkid=None):
 class Geometry(EsriJSON):
 
     def __init__(self, geometry=None, wkid=None, **extra):
-        print 'init geometry'
-        print geometry
         super(Geometry, self).__init__(**extra)
         ESRI_GEOMETRY_KEYS = ['x', 'xmin', 'points', 'paths', 'rings']
         #self['geometry'] = geometry or {}
         if 'x' in geometry and 'y' in geometry:
             self['x'] = geometry['x']
             self['y'] = geometry['y']
+        elif all(k in ['xmin', 'ymin', 'xmax', 'ymax'] for k in geometry):
+            self['xmin'] = geometry['xmin']
+            self['ymin'] = geometry['ymin']
+            self['xmax'] = geometry['xmax']
+            self['ymax'] = geometry['ymax']
         elif 'points' in geometry:
             self['points'] = geometry['points']
         elif 'paths' in geometry:
@@ -142,7 +145,6 @@ class Geometry(EsriJSON):
 
         if wkid:
             self['wkid'] = wkid
-        del self['type']
 
 
 

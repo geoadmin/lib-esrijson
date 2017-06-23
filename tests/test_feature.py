@@ -116,3 +116,18 @@ class TestFeature(BaseTestClass):
         esri_spec = {'xmin': 1, 'ymin': 1, 'xmax': 2, 'ymax': 2}
         esri_spec_alt = [1, 1, 2, 2]
         self.assertToShape(bbox, esri_spec, esri_spec_alt)
+
+    def test_extra(self):
+        polygon = self.getPolygon()
+        esri_spec = Feature(geometry=polygon,
+                            attributes={'name': 'a', 'number': 1},
+                            id=2,
+                            bbox=[1, 2, 4, 7])
+        self.assertPolygon(esri_spec['geometry'])
+        self.assertEqual(esri_spec['attributes']['name'], 'a')
+        self.assertEqual(esri_spec['attributes']['number'], 1)
+        self.assertEqual(esri_spec['id'], 2)
+        self.assertEqual(esri_spec['bbox'][0], 1)
+        self.assertEqual(esri_spec['bbox'][1], 2)
+        self.assertEqual(esri_spec['bbox'][2], 4)
+        self.assertEqual(esri_spec['bbox'][3], 7)

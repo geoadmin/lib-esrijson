@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from tests import BaseTestClass
 from esrijson import Geometry, Feature, dumps, loads
 
@@ -62,7 +64,7 @@ class TestFeature(BaseTestClass):
         self.assertMultiPolygon(geom_esri)
         self.assertIsInstance(geom_esri, Geometry)
 
-        feat = Feature(attributes={'a': u'*'}, geometry=geom, wkid=2056)
+        feat = Feature(attributes={'a': '*'}, geometry=geom, wkid=2056)
         feat_json = dumps(feat)
         feat_esri = loads(feat_json)
         self.assertEqual(feat_json, '{"geometry": {"rings": [[[0.0, 0.0], ' +

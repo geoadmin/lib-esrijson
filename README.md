@@ -41,3 +41,9 @@ esri_geom = esrijson.from_shape(geom)
 print(esri_geom)
 >>> {'paths': (((0.0, 0.0), (1.0, 1.0)), ((-1.0, 0.0), (1.0, 0.0)))}
 ```
+
+ESRI specs references
+---------------------
+
+- [Geometry Object](http://resources.arcgis.com/en/help/arcgis-rest-api/index.html#//02r3000000n1000000)
+- [Feature Object](http://resources.arcgis.com/en/help/arcgis-rest-api/index.html#/Feature_object/02r3000000n8000000/)

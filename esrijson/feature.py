@@ -1,26 +1,30 @@
 from esrijson.base import EsriJSON
+from esrijson.geometry import from_shape
 from esrijson.mapping import to_mapping
 
 
 class Feature(EsriJSON):
 
-    def __init__(self, id=None, geometry=None, wkid=None, attributes=None,
+    def __init__(self, geometry=None, wkid=None, attributes=None, id=None,
                  **extra):
 
         """
         Initialises a Feature object with the given parameters.
 
-        :param id: Feature identifier, such as a sequential number.
-        :type id: str, int (not comp. in esri spec)
         :param geometry: Geometry corresponding to the feature.
         :param wkid: well-know ID of the spatial reference.
         :param attributes: Dict containing the attributes of the feature.
         :type attributes: dict
+        :param id: Feature identifier, such as a sequential number.
+        :type id: str, int (not comp. in esri spec)
         """
         super(Feature, self).__init__(**extra)
         if id is not None:
             self["id"] = id
-        if geometry:
+        geom = from_shape(geometry, wkid=wkid)
+        if geom:
+            self['geometry'] = geom
+        elif geometry:
             self['geometry'] = self.to_instance(to_mapping(geometry), wkid)
         else:
             self['geometry'] = None

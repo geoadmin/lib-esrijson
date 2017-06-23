@@ -1,4 +1,9 @@
-from esrijson.utils import orient_polygon_coords
+from __future__ import unicode_literals
+
+import esrijson
+
+
+ESRI_GEOMETRY_KEYS = ['x', 'xmin', 'points', 'paths', 'rings']
 
 
 class EsriJSON(dict):
@@ -6,49 +11,57 @@ class EsriJSON(dict):
     def __init__(self, **extra):
         self.update(extra)
 
-    @classmethod
-    def to_instance(cls, obj, wkid):
-        # obj can be an OGC geometry or an instance of EsriJSON
-        if isinstance(obj, EsriJSON):
-            return dict(obj)['geometry']
-        else:
-            esri_geom = {}
+    def __getattr__(self, name):
+        """
+        Permit dictionary items to be retrieved like object attributes
 
-            # We use __geo_interface__ from GDAL (shapely)
-            type_ = obj.pop('type')
-            coords = obj.pop('coordinates')
-            if type_:
-                if type_ == 'Point':
-                    esri_geom['x'] = coords[0]
-                    esri_geom['y'] = coords[1]
-                    if len(coords) == 3:
-                        esri_geom['z'] = coords[2]
-                elif type_ == 'MultiPoint':
-                    esri_geom['points'] = coords
-                    if len(coords[0]) == 3:
-                        esri_geom['hasZ'] = True
-                elif type_ == 'LineString':
-                    esri_geom['paths'] = [coords]
-                    if len(coords[0]) == 3:
-                        esri_geom['hasZ'] = True
-                elif type_ == 'MultiLineString':
-                    esri_geom['paths'] = coords
-                    if len(coords[0][0]) == 3:
-                        esri_geom['hasZ'] = True
-                elif type_ == 'Polygon':
-                    esri_geom['rings'] = orient_polygon_coords(coords)
-                    if len(coords[0][0]) == 3:
-                        esri_geom['hasZ'] = True
-                elif type_ == 'MultiPolygon':
-                    esri_geom['rings'] = []
-                    for poly in coords:
-                        esri_geom['rings'].append(
-                            orient_polygon_coords(poly)[0])
-                    if len(coords[0][0][0]) == 3:
-                        esri_geom['hasZ'] = True
-                else:
-                    raise TypeError(
-                        'OGC geometry type %s is not supported' % type_)
-            if wkid:
-                esri_geom['spatialReference'] = {'wkid': int(wkid)}
-            return esri_geom
+        :param name: attribute name
+        :type name: str, int
+        :return: dictionary value
+        """
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(name)
+
+    def __setattr__(self, name, value):
+        """
+        Permit dictionary items to be set like object attributes.
+
+        :param name: key of item to be set
+        :type name: str
+        :param value: value to set item to
+        """
+
+        self[name] = value
+
+    def __delattr__(self, name):
+        """
+        Permit dictionary items to be deleted like object attributes
+
+        :param name: key of item to be deleted
+        :type name: str
+        """
+
+        del self[name]
+
+    @classmethod
+    def to_instance(cls, obj, default=None, wkid=None):
+        # for dumps, alternate default
+        if obj is None and default is not None:
+            instance = default()
+        elif isinstance(obj, EsriJSON):
+            instance = obj
+        elif isinstance(obj, dict):
+            d = {}
+            for k in obj:
+                d[k] = obj[k]
+            if any(k in ESRI_GEOMETRY_KEYS for k in obj):
+                factory = getattr(esrijson.factory, 'Geometry')
+                instance = factory(geometry=d)
+            elif 'attributes' in d and 'geometry' in d:
+                factory = getattr(esrijson.factory, 'Feature')
+                instance = factory(**d)
+            else:
+                instance = obj
+        return instance

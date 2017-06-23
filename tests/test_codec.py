@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from io import BytesIO  # NOQA
 from tests import BaseTestClass
 from esrijson import Geometry, Feature, dumps, loads
 
@@ -72,3 +73,9 @@ class TestFeature(BaseTestClass):
                                     '"spatialReference": {"wkid": 2056}}, ' +
                                     '"attributes": {"a": "a"}}')
         self.assertMultiPolygon(feat_esri['geometry'], wkid=2056)
+        self.assertIsInstance(feat_esri, Feature)
+
+        feat = Feature(attributes={'x': 'a'}, geometry=geom, wkid=2056)
+        feat_json = dumps(feat)
+        feat_esri = loads(feat_json)
+        self.assertIsInstance(feat_esri, Feature)

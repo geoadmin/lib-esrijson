@@ -86,7 +86,16 @@ def from_shape(obj, wkid=None):
     esri_geom = {}
     # We use __geo_interface__ from GDAL (shapely)
     type_ = obj.pop('type')
-    coords = obj.pop('coordinates')
+    if type_ == 'GeometryCollection':
+        # No concept of GeometryCollection in esri_json therefore we take
+        # the first one only
+        if len(obj['geometries']) == 0:
+            return esri_geom
+        first = obj['geometries'][0]
+        type_ = first.pop('type')
+        coords = first.pop('coordinates')
+    else:
+        coords = obj.pop('coordinates')
     if type_:
         if type_ == 'Point':
             esri_geom['x'] = coords[0]

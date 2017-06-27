@@ -1,6 +1,6 @@
 from tests import BaseTestClass
 from esrijson import Feature
-from shapely.geometry import box
+from shapely.geometry import box, GeometryCollection
 
 
 class TestFeature(BaseTestClass):
@@ -110,6 +110,12 @@ class TestFeature(BaseTestClass):
             esri_spec_copy['geometry'], hasZ=True, wkid=2056)
 
         self.assertToShape(multipolygon, esri_spec, esri_spec_copy)
+
+    def test_geometrycolleciton(self):
+        geomcollection = GeometryCollection([self.getPoint(),
+                                             self.getPolygon()])
+        esri_spec = Feature(geometry=geomcollection)
+        self.assertPoint(esri_spec['geometry'])
 
     def test_bbox(self):
         bbox = box(1, 1, 2, 2)

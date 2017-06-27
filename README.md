@@ -8,7 +8,7 @@ Introduction
 ------------
 
 This module is meant to build a bridge between GDAL `__geo_interface__` property via [Shapely](https://github.com/Toblerity/Shapely).
-There is no concept of `GeometryCollection` in esrijson syntax, so there is currently no support for this.
+There is no concept of `GeometryCollection` in esrijson syntax, so there is only a limited support for this concept. Currently, we only take the first geometry and drop the rest.
 This library is heavily inspired by [python-geojson](https://github.com/frewsxcv/python-geojson).
 
 Usage

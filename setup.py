@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(name='esrijson',
-      version='0.1',
+      version='0.2',
       description='Bindings and utilities for EsriJSON',
       classifiers=[],
       license='BDS',

@@ -47,11 +47,21 @@ def create_multipolygon(geometry):
 
 
 def _is_bbox(bbox):
-    if type(bbox) == list and len(bbox) == 4:
-        if bbox[0] > bbox[2] or bbox[1] > bbox[3]:
-            raise ValueError(
-                'Invalid bbox, must be [xmin, ymin, xmax, ymax]')
-        return True
+    return type(bbox) == list and len(bbox) == 4
+
+
+def _shift_bbox(bbox):
+    # Always respect the bottom left, top right convention
+    # Top right, bottom left
+    if bbox[0] > bbox[2] and bbox[1] > bbox[3]:
+        return [bbox[2],  bbox[3], bbox[0], bbox[1]]
+    # Top left, bottom right
+    elif bbox[2] > bbox[0] and bbox[1] > bbox[3]:
+        return [bbox[0], bbox[3], bbox[2], bbox[1]]
+    # Bottom right, top left
+    elif bbox[0] > bbox[2] and bbox[3] > bbox[1]:
+        return [bbox[2], bbox[1], bbox[0], bbox[3]]
+    return bbox
 
 
 def to_shape(obj):
@@ -60,7 +70,7 @@ def to_shape(obj):
         return create_point(geometry)
     elif 'xmin' in geometry or _is_bbox(geometry):
         if type(geometry) == list:
-            return box(*geometry)
+            return box(*_shift_bbox(geometry))
         else:
             return box(geometry['xmin'], geometry['ymin'],
                        geometry['xmax'], geometry['ymax'])

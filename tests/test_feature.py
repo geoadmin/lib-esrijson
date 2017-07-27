@@ -122,6 +122,18 @@ class TestFeature(BaseTestClass):
         esri_spec = {'xmin': 1, 'ymin': 1, 'xmax': 2, 'ymax': 2}
         esri_spec_alt = [1, 1, 2, 2]
         self.assertToShape(bbox, esri_spec, esri_spec_alt)
+        bbox = box(1, 1, 2, 2)
+        esri_spec = {'xmin': 1, 'ymin': 1, 'xmax': 2, 'ymax': 2}
+        esri_spec_alt = [2, 2, 1, 1]
+        self.assertToShape(bbox, esri_spec, esri_spec_alt)
+        bbox = box(1, 2, 3, 4)
+        esri_spec = {'xmin': 1, 'ymin': 2, 'xmax': 3, 'ymax': 4}
+        esri_spec_alt = [3, 2, 1, 4]
+        self.assertToShape(bbox, esri_spec, esri_spec_alt)
+        bbox = box(1, 2, 3, 4)
+        esri_spec = {'xmin': 1, 'ymin': 2, 'xmax': 3, 'ymax': 4}
+        esri_spec_alt = [1, 4, 3, 2]
+        self.assertToShape(bbox, esri_spec, esri_spec_alt)
 
     def test_extra(self):
         polygon = self.getPolygon()

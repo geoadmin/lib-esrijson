@@ -1,13 +1,18 @@
 from setuptools import setup
 
 
+with open("README.md", "r") as fh:
+        long_description = fh.read()
+
 setup(name='esrijson',
       version='0.4.1',
       description='Bindings and utilities for EsriJSON',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Intended Audience :: Developers',
-          'License :: OSI Approved :: MIT License',
+          'License :: OSI Approved :: BSD License',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
           'Programming Language :: Python :: 2',
@@ -18,7 +23,7 @@ setup(name='esrijson',
           'Topic :: Scientific/Engineering :: GIS',
           'Topic :: Software Development :: Libraries :: Python Modules'
       ],
-      license='BDS',
+      license='BSD',
       author='Loic Gasser',
       author_email=u'loicgasser4@gmail.com',
       url='https://github.com/geoadmin/lib-esrijson',

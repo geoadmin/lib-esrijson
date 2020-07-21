@@ -99,11 +99,21 @@ def from_shape(obj, wkid=None):
     if type_ == 'GeometryCollection':
         # No concept of GeometryCollection in esri_json therefore we take
         # the first one only
+        # We also may have a collections of collections
         if len(obj['geometries']) == 0:
             return esri_geom
         first = obj['geometries'][0]
-        type_ = first.pop('type')
-        coords = first.pop('coordinates')
+        if type(first) == list:
+            types_ = [d['type'] for d in first]
+            coords = [d['coordinates'] for d in first]
+    
+            if len(set(types_)) == 1 and types_[0] in ('Point', 'LineString', 'Polygon'):
+                type_ = 'Multi' + types_[0]
+            else:
+                raise TypeError('Cannot convert collection of different types into an Esri Multi(Point|LineString|Polygon)')
+        else:
+            type_ = first.pop('type')
+            coords = first.pop('coordinates')
     else:
         coords = obj.pop('coordinates')
     if type_:

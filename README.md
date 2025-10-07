@@ -1,8 +1,8 @@
 esrijson
 ========
 
-[![Build Status](https://travis-ci.org/geoadmin/lib-esrijson.svg?branch=master)](https://travis-ci.org/geoadmin/lib-esrijson)
-
+> [!WARNING]
+> This project is no longer under active development
 
 Introduction
 ------------
